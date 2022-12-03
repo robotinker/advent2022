@@ -110,14 +110,13 @@ struct ElfGroup {
 
 impl ElfGroup {
     fn find_badge(&self) -> char {
-        let inventories: Vec<Vec<&char>> = self.members[1..].iter().map(|sack| sack.item_types()).collect();
         let item_types = self.members[0].item_types();
-        let common_item = item_types.iter()
+        let common_item: Vec<bool> = item_types.iter()
             .map(|item| self.members[1..].iter()
-                .map(|sack| sack.contains(&item)).collect::<Vec<bool>>().contains(&false)
-            ).collect::<Vec<bool>>();
+                .map(|sack| sack.contains(item)).all(|x| x)
+            ).collect();
         for i in 0..item_types.len() {
-            if !common_item[i] {
+            if common_item[i] {
                 return *item_types[i];
             }
         }
