@@ -24,7 +24,7 @@ fn main() {
     
     println!("{}", biggest_stash);
 
-    elf_calories.sort();
+    elf_calories.sort_unstable();
     elf_calories.reverse();
     println!("{}", elf_calories[0] + elf_calories[1] + elf_calories[2]);
 }

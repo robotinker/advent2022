@@ -5,7 +5,7 @@ fn main() {
 
     let mut total = 0;
     for round in input.lines() {
-        let moves: Vec<&str> = round.split(" ").collect();
+        let moves: Vec<&str> = round.split(' ').collect();
         match moves[1] {
             "X" => total += 1,
             "Y" => total += 2,
@@ -38,14 +38,14 @@ fn main() {
                     total += 6;
                 }
             }
-            _ => println!("Invalid opponent move")
+            _ => println!("Invalid opponent move!")
         } 
     }
     println!("{}", total);
 
     total = 0;
     for round in input.lines() {
-        let moves: Vec<&str> = round.split(" ").collect();
+        let moves: Vec<&str> = round.split(' ').collect();
         match moves[1] {
             "X" => total += match moves[0] {
                 "A" => 3,
