@@ -15,14 +15,6 @@ fn get_priority(ch: char) -> u32 {
     }
 }
 
-#[test]
-fn test_priority() {
-    assert_eq!(get_priority('a'), 1);
-    assert_eq!(get_priority('z'), 26);
-    assert_eq!(get_priority('A'), 27);
-    assert_eq!(get_priority('Z'), 52);
-}
-
 struct Sack {
     a: Vec<char>,
     b: Vec<char>
@@ -61,18 +53,6 @@ impl Sack {
     }
 }
 
-#[test]
-fn test_sack() {
-    let sack = "abac".parse::<Sack>().expect("Couldn't parse sack");
-    assert_eq!(sack.find_shared().unwrap_or('!'), 'a');
-}
-
-#[test]
-fn test_fixed_sack() {
-    let sack = "aabc".parse::<Sack>().expect("Couldn't parse sack");
-    assert_eq!(sack.find_shared().unwrap_or('!'), '!');
-}
-
 impl FromStr for Sack {
     type Err = ParseError;
     fn from_str(input: &str) -> Result<Self, Self::Err> {
@@ -83,14 +63,6 @@ impl FromStr for Sack {
         let half_len = input.len() / 2;
         Ok(Sack{a: input[..half_len].chars().collect(), b: input[half_len..].chars().collect()})
     }
-}
-
-#[test]
-fn test_sack_split()
-{
-    let sack = "abac".parse::<Sack>().expect("Couldn't parse sack");
-    assert_eq!(sack.a.len(), 2);
-    assert_eq!(sack.b.len(), 2);
 }
 
 impl Clone for Sack {
@@ -124,12 +96,6 @@ impl ElfGroup {
     }
 }
 
-#[test]
-fn test_find_badge() {
-    let group = ElfGroup{members: vec!["aabb".parse::<Sack>().unwrap(), "ccbb".parse::<Sack>().unwrap(), "ddbb".parse::<Sack>().unwrap()]};
-    assert_eq!(group.find_badge(), 'b');
-}
-
 struct Input {
     sacks: Vec<Sack>
 }
@@ -149,4 +115,43 @@ fn main() {
         .chunks(3)
         .map(|chunk| get_priority(ElfGroup{members: chunk.to_vec()}.find_badge())).sum::<u32>()
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_priority() {
+        assert_eq!(get_priority('a'), 1);
+        assert_eq!(get_priority('z'), 26);
+        assert_eq!(get_priority('A'), 27);
+        assert_eq!(get_priority('Z'), 52);
+    }
+
+    #[test]
+    fn test_sack() {
+        let sack = "abac".parse::<Sack>().expect("Couldn't parse sack");
+        assert_eq!(sack.find_shared().unwrap_or('!'), 'a');
+    }
+
+    #[test]
+    fn test_fixed_sack() {
+        let sack = "aabc".parse::<Sack>().expect("Couldn't parse sack");
+        assert_eq!(sack.find_shared().unwrap_or('!'), '!');
+    }
+
+    #[test]
+    fn test_find_badge() {
+        let group = ElfGroup{members: vec!["aabb".parse::<Sack>().unwrap(), "ccbb".parse::<Sack>().unwrap(), "ddbb".parse::<Sack>().unwrap()]};
+        assert_eq!(group.find_badge(), 'b');
+    }
+
+    #[test]
+    fn test_sack_split()
+    {
+        let sack = "abac".parse::<Sack>().expect("Couldn't parse sack");
+        assert_eq!(sack.a.len(), 2);
+        assert_eq!(sack.b.len(), 2);
+    }
 }
