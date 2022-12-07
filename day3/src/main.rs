@@ -3,34 +3,33 @@ use std::str;
 
 const INPUT: &str = include_str!("input.txt");  // include in the binary a file on disk containing my input
 
-fn get_priority(ch: char) -> u32 {
-    if (97 .. 97 + 26).contains(&(ch as i32)) {
-        ch as u32 - 96
+fn get_priority(ch: &char) -> u32 {
+    if (97 .. 97 + 26).contains(&(*ch as i32)) {
+        *ch as u32 - 96
     }
-    else if (65 .. 65 + 26).contains(&(ch as i32)) {
-        ch as u32 - 64 + 26
+    else if (65 .. 65 + 26).contains(&(*ch as i32)) {
+        *ch as u32 - 64 + 26
     }
     else {
         0
     }
 }
 
+#[derive(Clone)]
 struct Sack {
     a: Vec<char>,
     b: Vec<char>
 }
 
 impl Sack {
-    fn find_shared(&self) -> Option<char> {
-        let matches: Vec<Option<char>> = self.a.iter()
-            .flat_map(|c1| self.b.iter()
-                .map(move |c2| if *c1 == *c2 {Some(*c1)} else {None}))
-                .filter(|x| x.is_some()).collect();
-        if matches.is_empty() {None} else {matches[0]}
+    fn find_shared(&self) -> Option<&char> {
+        let mut matches = self.a.iter()
+            .filter(|item| self.b.contains(item));
+        matches.next()
     }
 
     fn get_priority(&self) -> u32 {
-        get_priority(self.find_shared().unwrap_or_default())
+        get_priority(self.find_shared().unwrap_or_else(|| panic!("Tried to get priority value for sack that has no shared items between its compartments")))
     }
 
     fn contains(&self, c: &char) -> bool {
@@ -62,17 +61,6 @@ impl FromStr for Sack {
 
         let half_len = input.len() / 2;
         Ok(Sack{a: input[..half_len].chars().collect(), b: input[half_len..].chars().collect()})
-    }
-}
-
-impl Clone for Sack {
-    fn clone(&self) -> Self {
-        Sack{a: self.a.iter().copied().collect(), b: self.b.iter().copied().collect()}
-    }
-
-    fn clone_from(&mut self, source: &Self) { 
-        self.a = source.a.iter().copied().collect();
-        self.b = source.b.iter().copied().collect();
     }
 }
 
@@ -113,7 +101,7 @@ fn main() {
     println!("{}", input.sacks.iter().map(|sack| sack.get_priority()).sum::<u32>());
     println!("{}", input.sacks
         .chunks(3)
-        .map(|chunk| get_priority(ElfGroup{members: chunk.to_vec()}.find_badge())).sum::<u32>()
+        .map(|chunk| get_priority(&ElfGroup{members: chunk.to_vec()}.find_badge())).sum::<u32>()
     );
 }
 
@@ -123,22 +111,22 @@ mod tests {
 
     #[test]
     fn test_priority() {
-        assert_eq!(get_priority('a'), 1);
-        assert_eq!(get_priority('z'), 26);
-        assert_eq!(get_priority('A'), 27);
-        assert_eq!(get_priority('Z'), 52);
+        assert_eq!(get_priority(&'a'), 1);
+        assert_eq!(get_priority(&'z'), 26);
+        assert_eq!(get_priority(&'A'), 27);
+        assert_eq!(get_priority(&'Z'), 52);
     }
 
     #[test]
     fn test_sack() {
         let sack = "abac".parse::<Sack>().expect("Couldn't parse sack");
-        assert_eq!(sack.find_shared().unwrap_or('!'), 'a');
+        assert_eq!(sack.find_shared().unwrap_or(&'!'), &'a');
     }
 
     #[test]
     fn test_fixed_sack() {
         let sack = "aabc".parse::<Sack>().expect("Couldn't parse sack");
-        assert_eq!(sack.find_shared().unwrap_or('!'), '!');
+        assert_eq!(sack.find_shared().unwrap_or(&'!'), &'!');
     }
 
     #[test]
