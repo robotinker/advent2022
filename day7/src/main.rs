@@ -1,4 +1,4 @@
-use std::{str::FromStr, string::ParseError, collections::HashMap, cmp::Ordering};
+use std::{str::FromStr, string::ParseError, collections::HashMap};
 
 const INPUT: &str = include_str!("input.txt");  // include in the binary a file on disk containing my input
 
@@ -75,13 +75,7 @@ fn main() {
     let space_needed = 30000000;
     let space_to_free = space_needed - (total_size - input.dir_hash.get("/").unwrap().get_size(&input.dir_hash));
     println!("{}", input.dir_hash.values().filter(|dir| dir.get_size(&input.dir_hash) >= space_to_free).min_by(|a, b| {
-        let mut diff = b.get_size(&input.dir_hash) - a.get_size(&input.dir_hash);
-        diff = diff / diff.abs();
-        match diff {
-            1 => Ordering::Less,
-            -1 => Ordering::Greater,
-            _ => Ordering::Equal
-        }
+        a.get_size(&input.dir_hash).cmp(&b.get_size(&input.dir_hash))
     }).unwrap().get_size(&input.dir_hash));
 }
 
@@ -94,10 +88,10 @@ mod tests {
         let input = "$ ls\ndir A\ndir B\ndir C\n100 ted.png\n$ cd A\n$ ls\ndir D\ndir E\n$ cd D\n$ ls\n300 Shogen.jpg\n$ cd ..\n$ cd E\n$ ls\n200 lynx.png\n$ cd /\n$ cd B\n$ ls\n12 foo.png\n45 bar.png"
         .parse::<Input>().expect("Input must parse");
 
-        assert_eq!(input.dir_hash.get("D").unwrap().files[0].name, "Shogen.jpg");
-        assert_eq!(input.dir_hash.get("D").unwrap().get_size(&input.dir_hash), 300);
-        assert_eq!(input.dir_hash.get("A").unwrap().get_size(&input.dir_hash), 500);
-        assert_eq!(input.dir_hash.get("B").unwrap().get_size(&input.dir_hash), 57);
+        assert_eq!(input.dir_hash.get("//A/D").unwrap().files[0].name, "Shogen.jpg");
+        assert_eq!(input.dir_hash.get("//A/D").unwrap().get_size(&input.dir_hash), 300);
+        assert_eq!(input.dir_hash.get("//A").unwrap().get_size(&input.dir_hash), 500);
+        assert_eq!(input.dir_hash.get("//B").unwrap().get_size(&input.dir_hash), 57);
         assert_eq!(input.dir_hash.get("/").unwrap().get_size(&input.dir_hash), 657);
     }
 }
